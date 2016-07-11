@@ -205,6 +205,42 @@ NIL
 NIL
 1
 
+PLOT
+21
+369
+221
+519
+Democrats
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles with [color = blue]"
+
+PLOT
+23
+532
+223
+682
+Republicans
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles with [color = red]"
+
 @#$#@#$#@
 ## WHAT IS IT?
 
