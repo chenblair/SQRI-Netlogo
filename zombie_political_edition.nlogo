@@ -14,6 +14,7 @@ to go
   let republicans turtles with [color = red]
   let democrats turtles with [color = blue]
   let politicians turtles with [color = red or color = blue]
+  ifelse random 2 = 1 [
   ask republicans [
     ifelse any? humans in-radius political-discernment [
       let closest min-one-of humans [distance myself]
@@ -28,8 +29,8 @@ to go
           let closest min-one-of humans [distance myself]
           face closest
           forward (Indoctrination-speed / 100)
-          if any? turtles-here with [color = red] [
-            ask turtles-here with [color = red] [set color white]
+          if any? turtles-here with [color = blue] [
+            ask turtles-here with [color = blue] [set color white]
           ]
         ] [
           set heading random 360
@@ -61,6 +62,56 @@ to go
         ]
       ]
     ]
+  ]
+  ] [
+  ask democrats [
+    ifelse any? humans in-radius political-discernment [
+      let closest min-one-of humans [distance myself]
+      face closest
+      forward (Indoctrination-speed / 100)
+      if any? turtles-here with [color = white] [
+        ask turtles-here with [color = white] [set color blue]
+      ]
+    ] [
+      if any? humans [
+        ifelse any? democrats in-radius political-discernment [
+          let closest min-one-of humans [distance myself]
+          face closest
+          forward (Indoctrination-speed / 100)
+          if any? turtles-here with [color = red] [
+            ask turtles-here with [color = red] [set color white]
+          ]
+        ] [
+          set heading random 360
+          forward (Indoctrination-speed / 100)
+        ]
+      ]
+    ]
+  ]
+  ask republicans [
+    ifelse any? humans in-radius political-discernment [
+      let closest min-one-of humans [distance myself]
+      face closest
+      forward (Indoctrination-speed / 100)
+      if any? turtles-here with [color = white] [
+        ask turtles-here with [color = white] [set color red]
+      ]
+    ] [
+      if any? humans [
+      ifelse any? democrats in-radius political-discernment [
+          let closest min-one-of humans [distance myself]
+          face closest
+          forward (Indoctrination-speed / 100)
+          if any? turtles-here with [color = blue] [
+            ask turtles-here with [color = blue] [set color white]
+          ]
+        ] [
+          set heading random 360
+          forward (Indoctrination-speed / 100)
+        ]
+      ]
+    ]
+  ]
   ]
   ask humans [
     if any? politicians in-radius 4 [
