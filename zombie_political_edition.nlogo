@@ -23,16 +23,18 @@ to go
         ask turtles-here with [color = white] [set color red]
       ]
     ] [
+      if any? humans [
       ifelse any? democrats in-radius political-discernment [
-        let closest min-one-of humans [distance myself]
-        face closest
-        forward (Indoctrination-speed / 100)
-        if any? turtles-here with [color = red] [
-          ask turtles-here with [color = red] [set color white]
+          let closest min-one-of humans [distance myself]
+          face closest
+          forward (Indoctrination-speed / 100)
+          if any? turtles-here with [color = red] [
+            ask turtles-here with [color = red] [set color white]
+          ]
+        ] [
+          set heading random 360
+          forward (Indoctrination-speed / 100)
         ]
-      ] [
-        set heading random 360
-        forward (Indoctrination-speed / 100)
       ]
     ]
   ]
@@ -45,16 +47,18 @@ to go
         ask turtles-here with [color = white] [set color blue]
       ]
     ] [
-      ifelse any? democrats in-radius political-discernment [
-        let closest min-one-of humans [distance myself]
-        face closest
-        forward (Indoctrination-speed / 100)
-        if any? turtles-here with [color = red] [
-          ask turtles-here with [color = red] [set color white]
+      if any? humans [
+        ifelse any? democrats in-radius political-discernment [
+          let closest min-one-of humans [distance myself]
+          face closest
+          forward (Indoctrination-speed / 100)
+          if any? turtles-here with [color = red] [
+            ask turtles-here with [color = red] [set color white]
+          ]
+        ] [
+          set heading random 360
+          forward (Indoctrination-speed / 100)
         ]
-      ] [
-        set heading random 360
-        forward (Indoctrination-speed / 100)
       ]
     ]
   ]
