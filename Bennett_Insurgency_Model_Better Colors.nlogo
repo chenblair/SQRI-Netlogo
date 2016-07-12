@@ -1,10 +1,55 @@
 breed [citizens citizen]
+breed [soldiers soldier]
+
+citizens-own [anger
+              fear
+              violence
+              hurt
+              attack-mod]
+
+patches-own [city-density]
+soldiers-own [redcounter]
+globals [num-attacks casualties death-toll civs-hurt attack-effectiveness init-civs num-soldiers]
+
 to setup
   clear-all
-  ask n-of  (count patches * (density)) patches
-             [sprout 1 [set color green set shape "circle"]]
+  set num-attacks 0
+  set death-toll 0
+  set casualties 0
+  set civs-hurt 0
+
+
+  ask n-of  (count patches * (density / 100)) patches
+             [sprout-citizens 1 [set color green set shape "circle"]]
+  set init-civs count citizens
+
+
+  set num-soldiers (count citizens) / Citizen-Soldier-Ratio
+  let empty-patches count patches with [not any? turtles-here]
+  if num-soldiers < 1 [set num-soldiers 1]
+  if num-soldiers > empty-patches [set num-soldiers empty-patches]
+  ask n-of num-soldiers patches with [not any? turtles-here]
+               [sprout-soldiers 1 [set color blue set shape "square"]]
+
+  ask citizens [set hurt 0
+                set attack-mod 1
+                set anger random-normal .25 .125
+                if anger > 1 [set anger 1]
+                if anger < 0 [set anger 0]
+                set fear random-normal .5 .25
+                if fear > 1 [set fear 1]
+                if fear < 0 [set fear 0]
+                set violence random-normal .5 .25
+                if violence > 1 [set violence 1]
+                if violence < 0 [set violence 0]
+                ]
+  ask citizens with [anger > violence and anger > fear] [set shape "star" set-civ-color]
   ask turtles [
     set heading 0
+    let mover (random (count patches * (density)))
+    while [turtle (random (count patches * (density))) = nobody] [
+      set mover (random (count patches * (density)))
+    ]
     move-to one-of turtles
     while [any? other turtles-here] [
         rt ((random 4) * 90)
@@ -13,45 +58,132 @@ to setup
 
     ]
   ]
+  reset-ticks
 
+end
 
+to set-civ-color
+  set color green
+  if anger > fear and violence > anger [set color yellow]
+  if anger > violence and fear > anger [set color yellow]
+  if anger > violence and anger > fear [set color orange set shape "star"]
+
+end
+
+to go
+  let temp-attacks num-attacks
+  let attacker no-turtles
+  ask citizens [
+     ifelse anger > violence and anger > fear [set shape "star" set-civ-color] [set shape "circle" set-civ-color]]
+  set attacker one-of citizens with [shape = "star" and any? soldiers in-radius 3]
+  if attacker != nobody
+       [ask attacker [set color red
+                     wait .1
+                     launch-attack
+                     ]
+        counter-strike attacker
+       ]
+   tick
+   if temp-attacks = num-attacks [stop]
+end
+
+to counter-strike [target]
+  let target-location [patch-here] of target
+  set attack-effectiveness effectiveness
+  ifelse random 100 < attack-effectiveness
+         [ ask target [die]
+           set death-toll death-toll + 1
+           if replacement? [ask one-of patches with [not any? turtles-here]
+                              [sprout-citizens 1
+                                [set-civ-color
+                                 set shape "circle"
+                                 set fear mean [fear] of citizens in-radius 3 ; NOT exactly as Bennett see article 6.1
+                                 set anger mean [anger] of citizens in-radius 3
+                                 set violence random-normal .5 .25
+                                 if violence > 1 [set violence 1]
+                                 if violence < 0 [set violence 0]
+                                 set-civ-color]]]
+          ]
+         [ask target [set attack-mod attack-mod + (attack-mod * .1)]] ; if the target isn't killed it becomes more effective
+
+  let num-hurt 0
+  ask target-location [
+                ask citizens in-radius 3
+                     [if random 101 > Accuracy
+                        [set num-hurt num-hurt + 1
+                         set civs-hurt civs-hurt + 1
+                         set hurt 1]]
+                ask citizens in-radius 3 with [hurt = 1]
+                    [set fear fear + (.1 * (1 - fear))
+                     set anger anger + (.05 * num-hurt * (1 - anger))
+                     set hurt 0]]
+   end
+
+to launch-attack
+   ask soldiers [set redcounter redcounter - 1
+                 ifelse redcounter < 0 [set redcounter 0] [set color red]
+                 if redcounter = 0  [set color blue]]
+   set num-attacks num-attacks  + 1
+   ask one-of soldiers in-radius 3 [set color red set redcounter 3]
+   if random 100 < (insurgent-deadliness * attack-mod)
+     [
+       set casualties casualties + 1
+       if soldiers-move? [ask one-of soldiers in-radius 3 [die]
+       ask one-of patches with [not any? turtles-here]
+           [sprout-soldiers 1 [set color blue set shape "square"]]]
+      ]
 
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
+417
 10
-649
-470
-16
-16
-13.0
+1037
+651
+30
+30
+10.0
 1
 10
 1
 1
 1
 0
-1
-1
-1
--16
-16
--16
-16
 0
 0
+1
+-30
+30
+-30
+30
+1
+1
 1
 ticks
 30.0
 
+SLIDER
+13
+48
+185
+81
+Density
+Density
+0
+90
+42
+1
+1
+%
+HORIZONTAL
+
 BUTTON
-51
-53
-117
-86
+28
+10
+91
+43
 NIL
-setup\n
+setup
 NIL
 1
 T
@@ -62,57 +194,209 @@ NIL
 NIL
 1
 
-SLIDER
-29
-112
-201
-145
-Density
-Density
-0
+BUTTON
+97
+10
+160
+43
+NIL
+go
+T
 1
-0.17
-0.01
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+SLIDER
+12
+84
+184
+117
+Citizen-Soldier-Ratio
+Citizen-Soldier-Ratio
+5
+100
+5
+1
 1
 NIL
 HORIZONTAL
 
+SLIDER
+10
+166
+182
+199
+Accuracy
+Accuracy
+0
+100
+50
+1
+1
+%
+HORIZONTAL
+
+SLIDER
+10
+204
+182
+237
+Effectiveness
+Effectiveness
+0
+100
+50
+1
+1
+%
+HORIZONTAL
+
+PLOT
+12
+252
+262
+388
+Casualty Ratio (deaths/initial#)
+Time
+Ratio
+0.0
+1.0
+0.0
+1.0
+true
+true
+"" ""
+PENS
+"Civilian " 1.0 0 -16777216 true "" "plot (death-toll / init-civs)"
+"Military " 1.0 0 -2674135 true "" "plot (casualties / num-soldiers)"
+
+SWITCH
+222
+30
+357
+63
+Replacement?
+Replacement?
+1
+1
+-1000
+
+SWITCH
+207
+691
+346
+724
+Soldiers-Move?
+Soldiers-Move?
+1
+1
+-1000
+
+SLIDER
+9
+129
+181
+162
+Insurgent-Deadliness
+Insurgent-Deadliness
+0
+20
+11
+1
+1
+%
+HORIZONTAL
+
+TEXTBOX
+205
+741
+370
+797
+With movement on, soldiers may\nappear in a new location after\n'death'
+11
+0.0
+1
+
+TEXTBOX
+210
+73
+395
+157
+With replacement killed insurgents\nare replaced with new civilians with\nfear and anger = local means and a new violence threshold
+11
+0.0
+1
+
+MONITOR
+277
+239
+344
+284
+NIL
+death-toll
+17
+1
+11
+
+PLOT
+15
+400
+263
+550
+Citizen Violence Propensity
+ticks
+v
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [violence] of citizens"
+
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+This section could give a general understanding of what the model is trying to show or explain.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+This section could explain what rules the agents use to create the overall behavior of the model.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+This section could explain how to use the model, including a description of each of the items in the interface tab.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
+This section could give some ideas of things for the user to notice while running the model.
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+This section could give some ideas of things for the user to try to do (move sliders, switches, etc.) with the model.
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+This section could give some ideas of things to add or change in the procedures tab to make the model more complicated, detailed, accurate, etc.
 
 ## NETLOGO FEATURES
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+This section could point out any especially interesting or unusual features of NetLogo that the model makes use of, particularly in the Procedures tab.  It might also point out places where workarounds were needed because of missing features.
 
 ## RELATED MODELS
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+This section could give the names of models in the NetLogo Models Library or elsewhere which are of related interest.
 
 ## CREDITS AND REFERENCES
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+This section could contain a reference to the model's URL on the web if it has one, as well as any other necessary credits or references.
 @#$#@#$#@
 default
 true
@@ -306,22 +590,6 @@ Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
 Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
 Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
 
-sheep
-false
-15
-Circle -1 true true 203 65 88
-Circle -1 true true 70 65 162
-Circle -1 true true 150 105 120
-Polygon -7500403 true false 218 120 240 165 255 165 278 120
-Circle -7500403 true false 214 72 67
-Rectangle -1 true true 164 223 179 298
-Polygon -1 true true 45 285 30 285 30 240 15 195 45 210
-Circle -1 true true 3 83 150
-Rectangle -1 true true 65 221 80 296
-Polygon -1 true true 195 285 210 285 210 240 240 210 195 210
-Polygon -7500403 true false 276 85 285 105 302 99 294 83
-Polygon -7500403 true false 219 85 210 105 193 99 201 83
-
 square
 false
 0
@@ -405,13 +673,6 @@ Line -7500403 true 216 40 79 269
 Line -7500403 true 40 84 269 221
 Line -7500403 true 40 216 269 79
 Line -7500403 true 84 40 221 269
-
-wolf
-false
-0
-Polygon -16777216 true false 253 133 245 131 245 133
-Polygon -7500403 true true 2 194 13 197 30 191 38 193 38 205 20 226 20 257 27 265 38 266 40 260 31 253 31 230 60 206 68 198 75 209 66 228 65 243 82 261 84 268 100 267 103 261 77 239 79 231 100 207 98 196 119 201 143 202 160 195 166 210 172 213 173 238 167 251 160 248 154 265 169 264 178 247 186 240 198 260 200 271 217 271 219 262 207 258 195 230 192 198 210 184 227 164 242 144 259 145 284 151 277 141 293 140 299 134 297 127 273 119 270 105
-Polygon -7500403 true true -1 195 14 180 36 166 40 153 53 140 82 131 134 133 159 126 188 115 227 108 236 102 238 98 268 86 269 92 281 87 269 103 269 113
 
 x
 false

@@ -46,10 +46,6 @@ to setup
   ask citizens with [anger > violence and anger > fear] [set shape "star" set-civ-color]
   ask turtles [
     set heading 0
-    let mover (random (count patches * (density)))
-    while [turtle (random (count patches * (density))) = nobody] [
-      set mover (random (count patches * (density)))
-    ]
     move-to one-of turtles
     while [any? other turtles-here] [
         rt ((random 4) * 90)
@@ -102,6 +98,13 @@ to counter-strike [target]
                                  set violence random-normal .5 .25
                                  if violence > 1 [set violence 1]
                                  if violence < 0 [set violence 0]
+                                 set heading 0
+                                 move-to one-of turtles
+                                 while [any? other turtles-here] [
+                                   rt ((random 4) * 90)
+                                   fd 1
+                                   set heading 0
+                                 ]
                                  set-civ-color]]]
           ]
          [ask target [set attack-mod attack-mod + (attack-mod * .1)]] ; if the target isn't killed it becomes more effective
@@ -282,7 +285,7 @@ SWITCH
 63
 Replacement?
 Replacement?
-1
+0
 1
 -1000
 
