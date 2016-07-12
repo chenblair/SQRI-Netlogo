@@ -30,7 +30,7 @@ to go
           face closest
           forward (Indoctrination-speed / 100)
           if any? turtles-here with [color = blue] [
-            ask turtles-here with [color = blue] [set color white]
+            ask turtles-here [set color white]
           ]
         ] [
           set heading random 360
@@ -49,12 +49,12 @@ to go
       ]
     ] [
       if any? humans [
-        ifelse any? democrats in-radius political-discernment [
+        ifelse any? republicans in-radius political-discernment [
           let closest min-one-of humans [distance myself]
           face closest
           forward (Indoctrination-speed / 100)
           if any? turtles-here with [color = red] [
-            ask turtles-here with [color = red] [set color white]
+            ask turtles-here [set color white]
           ]
         ] [
           set heading random 360
@@ -74,12 +74,12 @@ to go
       ]
     ] [
       if any? humans [
-        ifelse any? democrats in-radius political-discernment [
+        ifelse any? republicans in-radius political-discernment [
           let closest min-one-of humans [distance myself]
           face closest
           forward (Indoctrination-speed / 100)
           if any? turtles-here with [color = red] [
-            ask turtles-here with [color = red] [set color white]
+            ask turtles-here [set color white]
           ]
         ] [
           set heading random 360
@@ -103,7 +103,7 @@ to go
           face closest
           forward (Indoctrination-speed / 100)
           if any? turtles-here with [color = blue] [
-            ask turtles-here with [color = blue] [set color white]
+            ask turtles-here [set color white]
           ]
         ] [
           set heading random 360
@@ -192,7 +192,7 @@ Percent-republicans
 Percent-republicans
 0
 10
-10
+1
 1
 1
 %
@@ -237,7 +237,7 @@ Percent-democrats
 Percent-democrats
 0
 10
-10
+1
 1
 1
 %
