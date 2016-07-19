@@ -1,10 +1,10 @@
 globals [max-complexity mutation-chance]
-turtles-own [complexity strategy lifespan next]
+turtles-own [complexity strategy lifespan next record recordLength]
 
 to setup
   clear-all
   let default-lifespan 5
-  set mutation-chance 0.5
+  set mutation-chance 0.2
   set max-complexity 5
 
   ask patches [
@@ -30,6 +30,8 @@ to setup
     ]
   ]
   ask turtles [
+    set recordLength 0
+    set record 0
     set heading 0
     set shape "circle"
     set complexity 0
@@ -38,6 +40,9 @@ to setup
   reset-ticks
 end
 to go
+  ask turtles [
+    playGame (one-of other turtles) (one-of turtles-here)
+  ]
   ask turtles with [lifespan <= 0] [
     die
   ]
@@ -46,13 +51,18 @@ to go
   ]
   tick
 end
-to evolve
+to evolve [parent-strategy]
   set complexity complexity + 1
   let strategy2 0
   let set-strategy 0
   let color-count 0
   while [set-strategy < (4 ^ complexity)] [
-    if (mutation-chance > random 1) [
+    let set-strategy-mod remainder set-strategy 4 ^ (complexity - 1)
+    if (mutation-chance > random 1 and remain (floor (parent-strategy / (2 ^ set-strategy-mod))) 2 = 1) [
+      set strategy2 strategy2 + (2 ^ set-strategy)
+      set color-count color-count + 1
+    ]
+    if (mutation-chance < random 1 and remain (floor (parent-strategy / (2 ^ set-strategy-mod))) 2 != 1) [
       set strategy2 strategy2 + (2 ^ set-strategy)
       set color-count color-count + 1
     ]
@@ -62,15 +72,19 @@ to evolve
   set color 10 - (10 * color-count / (4 ^ complexity))
 end
 to reproduce
+  let parent-strategy strategy
   ifelse mutation-chance > random 1 [
     let next2 next
     ask patch-here [
       sprout 1 [
         set next next2
+        set recordLength 0
+        set record 0
         set shape "circle"
         set lifespan 5
-        evolve
+        evolve parent-strategy
         let patience 50
+        getNext
         while [any? other turtles-here] [
           set heading 0
           rt ((random 4) * 90)
@@ -89,26 +103,72 @@ to reproduce
 end
 
 to playGame [turtle1 turtle2]
+  let outcome 0
   ask turtle1 [
     let next2 next
     ask turtle2 [
       ifelse (next2 = 1) [
         ifelse (next = 1) [
           set lifespan lifespan - 2
+          set record record + 3
+          ask turtle1 [
+            set lifespan lifespan - 2
+            set record record + 3
+          ]
+          set outcome 3
         ][
           set lifespan lifespan - 3
+          set record record + 1
+          ask turtle1 [
+            set lifespan lifespan - 0
+            set record record + 2
+          ]
+          set outcome 2
         ]
       ] [
         ifelse (next = 1) [
           set lifespan lifespan - 0
+          set record record + 2
+          ask turtle1 [
+            set lifespan lifespan - 3
+            set record record + 1
+          ]
+          set outcome 1
         ][
           set lifespan lifespan - 1
+          set record record + 0
+          ask turtle1 [
+            set lifespan lifespan - 1
+            set record record + 0
+          ]
+          set outcome 0
         ]
       ]
+      makeRecord outcome
+      getNext
     ]
+    makeRecord outcome
+    getNext
   ]
   ; initial 2 total, each defect pushes 1
+end
 
+to makeRecord [outcome]
+  set recordLength recordLength + 1
+  set record outcome * (4 ^ recordLength)
+  if (recordLength > complexity) [
+    set record floor (record / 4)
+  ]
+end
+
+to getNext
+  set next (strategy / (2 ^ record))
+  set next floor (next)
+  set next remain next 2
+end
+
+to-report remain [one two]
+  report one - (floor (one / two) * two)
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -147,7 +207,7 @@ num-turtle
 num-turtle
 0
 100
-3
+45
 1
 1
 NIL
