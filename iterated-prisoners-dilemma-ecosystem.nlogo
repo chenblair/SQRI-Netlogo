@@ -1,5 +1,5 @@
 globals [max-complexity mutation-chance dead default-lifespan]
-turtles-own [complexity strategy lifespan next record recordLength]
+turtles-own [complexity strategy lifespan next record recordLength average-color]
 
 to setup
   clear-all
@@ -12,6 +12,7 @@ to setup
   ]
   ask n-of num-turtle patches [
     sprout 1 [
+      set average-color -1
       set color white
       set strategy 0
       set next 0
@@ -19,6 +20,7 @@ to setup
   ]
   ask n-of num-turtle patches [
     sprout 1 [
+      set average-color 1
       set color black
       let set-strategy 0
       set strategy 0
@@ -72,7 +74,8 @@ to evolve [parent-strategy]
     set set-strategy set-strategy + 1
   ]
   set strategy strategy2
-  set color 10 - (10 * color-count / ((4 ^ complexity)))
+  set average-color ((color-count / (4 ^ complexity)) * 2) - 1
+  set color 10 - (10 * color-count / (4 ^ complexity))
 end
 to reproduce
   let parent-strategy strategy
@@ -205,11 +208,11 @@ end
 GRAPHICS-WINDOW
 210
 10
-649
-470
-16
-16
-13.0
+823
+644
+100
+100
+3.0
 1
 10
 1
@@ -219,10 +222,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--16
-16
--16
-16
+-100
+100
+-100
+100
 0
 0
 1
@@ -238,7 +241,7 @@ num-turtle
 num-turtle
 0
 100
-18
+2
 1
 1
 NIL
@@ -295,6 +298,24 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot dead"
+
+PLOT
+969
+52
+1169
+202
+defection
+NIL
+NIL
+0.0
+10.0
+-1.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [average-color] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
