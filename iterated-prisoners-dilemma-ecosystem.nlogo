@@ -1,10 +1,8 @@
-globals [max-complexity mutation-chance dead default-lifespan]
+globals [max-complexity dead]
 turtles-own [complexity strategy lifespan next record recordLength average-color]
 
 to setup
   clear-all
-  set default-lifespan 3
-  set mutation-chance 0.2
   set max-complexity 5
   set dead 0
   ask patches [
@@ -43,7 +41,7 @@ to setup
 end
 to go
   ask turtles [
-    let closest min-one-of turtles [distance myself]
+    let closest min-one-of other turtles [distance myself]
     playGame (closest) (one-of turtles-here)
   ]
   ask turtles with [lifespan <= 0] [
@@ -81,7 +79,7 @@ to reproduce
   let parent-strategy strategy
   let parent-complexity complexity
   let parent-color color
-  ifelse mutation-chance > random-float 1 [
+  ifelse evolve-chance > random-float 1 [
     ask patch-here [
       sprout 1 [
         let patience 10
@@ -122,7 +120,7 @@ to reproduce
         set complexity parent-complexity
         set recordLength 0
         set record 0
-        set lifespan 5
+        set lifespan default-lifespan
         set strategy parent-strategy
         getNext
       ]
@@ -207,9 +205,9 @@ end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
-10
+11
 823
-644
+645
 100
 100
 3.0
@@ -241,7 +239,7 @@ num-turtle
 num-turtle
 0
 100
-2
+1
 1
 1
 NIL
@@ -309,13 +307,77 @@ NIL
 NIL
 0.0
 10.0
--1.0
-1.0
+-0.01
+0.01
 true
 false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot mean [average-color] of turtles"
+"pen-1" 1.0 0 -7500403 true "" "plot 0"
+
+PLOT
+969
+265
+1169
+415
+complexity
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [complexity] of turtles"
+
+SLIDER
+23
+387
+195
+420
+evolve-chance
+evolve-chance
+0
+1
+0.1
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+20
+436
+192
+469
+mutation-chance
+mutation-chance
+0
+1
+0.5
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+20
+487
+192
+520
+default-lifespan
+default-lifespan
+3
+10
+5
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
