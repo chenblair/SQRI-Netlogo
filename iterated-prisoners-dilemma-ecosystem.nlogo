@@ -1,5 +1,5 @@
 globals [max-complexity dead]
-turtles-own [complexity strategy lifespan next record recordLength average-color]
+turtles-own [complexity strategy lifespan next record recordLength average-color outcome pool]
 
 to setup
   clear-all
@@ -30,6 +30,7 @@ to setup
     ]
   ]
   ask turtles [
+    set pool 0
     set recordLength 0
     set record 0
     set heading 0
@@ -41,12 +42,20 @@ to setup
 end
 to go
   ask turtles [
+    ifelse count turtles in-radius range > 4
+    [
+      playGroup turtles in-radius range
+    ] [
     let closest min-one-of other turtles [distance myself]
     playGame (closest) (one-of turtles-here)
+    ]
   ]
   ask turtles with [lifespan <= 0] [
     set dead dead + 1
     die
+  ]
+  if (count turtles = 0) [
+    stop
   ]
   ask turtles [
     if (remain (ticks) = 1) [
@@ -57,17 +66,19 @@ to go
 end
 to evolve [parent-strategy parent-complexity]
   set complexity parent-complexity + 1
-  print complexity
+  if (complexity > 4) [
+    set complexity complexity - 1
+  ]
   let strategy2 0
   let set-strategy 0
   let color-count 0
   while [set-strategy < (4 ^ complexity)] [
     let set-strategy-mod remainder set-strategy 4 ^ (complexity - 1)
-    ifelse (mutation-chance > random-float 1 and remain (floor (parent-strategy / (2 ^ set-strategy-mod))) = 1) [
+    ifelse (mutation-chance < random-float 1 and remain (floor (parent-strategy / (2 ^ set-strategy-mod))) = 1) [
       set strategy2 strategy2 + (2 ^ set-strategy)
       set color-count color-count + 1
     ] [
-      if (mutation-chance < random-float 1 and remain (floor (parent-strategy / (2 ^ set-strategy-mod))) != 1) [
+      if (mutation-chance > random-float 1 and remain (floor (parent-strategy / (2 ^ set-strategy-mod))) != 1) [
         set strategy2 strategy2 + (2 ^ set-strategy)
         set color-count color-count + 1
       ]
@@ -85,7 +96,7 @@ to reproduce
   ifelse evolve-chance > random-float 1 [
     ask patch-here [
       sprout 1 [
-        let patience 1
+        let patience 10
         set shape "circle"
         while [any? other turtles-here] [
           set heading 0
@@ -95,7 +106,7 @@ to reproduce
             die
             stop
           ]
-          set patience patience + 1
+          set patience patience - 1
         ]
         set recordLength 0
         set record 0
@@ -118,7 +129,7 @@ to reproduce
             die
             stop
           ]
-          set patience patience + 1
+          set patience patience - 1
         ]
         set complexity parent-complexity
         set recordLength 0
@@ -132,8 +143,6 @@ to reproduce
 end
 
 to playGame [turtle1 turtle2]
-  let outcome 0
-  let outcome2 0
   if (turtle1 != nobody) [
   ask turtle1 [
     let next2 next
@@ -143,36 +152,36 @@ to playGame [turtle1 turtle2]
           set lifespan lifespan - 2
           ask turtle1 [
             set lifespan lifespan - 2
+            set outcome 3
           ]
           set outcome 3
-          set outcome2 3
         ][
           set lifespan lifespan - 3
           ask turtle1 [
             set lifespan lifespan - 0
+            set outcome 2
           ]
           ;turtle 2 cooperates turtle 1 defects
-          set outcome 2
-          set outcome2 1
+          set outcome 1
         ]
       ] [
         ifelse (next = 1) [
           set lifespan lifespan - 0
           ask turtle1 [
             set lifespan lifespan - 3
+            set outcome 1
           ]
-          set outcome 1
-          set outcome2 2
+          set outcome 2
         ][
           set lifespan lifespan - 1
           ask turtle1 [
             set lifespan lifespan - 1
+            set outcome 0
           ]
           set outcome 0
-          set outcome2 0
         ]
       ]
-      makeRecord outcome2
+      makeRecord outcome
       getNext
     ]
     makeRecord outcome
@@ -182,8 +191,8 @@ to playGame [turtle1 turtle2]
   ; initial 2 total, each defect pushes 1
 end
 
-to makeRecord [outcome]
-  set record record + outcome * (4 ^ recordLength)
+to makeRecord [outcomes]
+  set record record + outcomes * (4 ^ recordLength)
   set recordLength recordLength + 1
   if (recordLength > complexity) [
     set record floor (record / 4)
@@ -198,6 +207,37 @@ to getNext
   set next remain next
 end
 
+to playGroup [group]
+  ask group [
+    ifelse next = 1 [
+      ask other group [
+        set pool pool - (2 / (count group - 1))
+      ]
+    ] [
+      set pool pool - 1
+    ]
+  ]
+  ask group [
+    ifelse (next = 1) [
+      ifelse (pool > -2) [
+        set outcome 2
+      ][
+        set outcome 3
+      ]
+    ] [
+      ifelse (pool > -3) [
+        set outcome 0
+      ][
+        set outcome 1
+      ]
+    ]
+    set lifespan lifespan + pool
+    set pool 0
+    makeRecord outcome
+    getNext
+  ]
+end
+
 to-report remain [one]
   ifelse (one / 2 = floor (one / 2)) [
     report 0
@@ -209,11 +249,11 @@ end
 GRAPHICS-WINDOW
 255
 40
-500
-216
+557
+358
 25
 25
-3.0
+8.0
 1
 10
 1
@@ -287,7 +327,7 @@ PLOT
 214
 216
 364
-plot 1
+players
 NIL
 NIL
 0.0
@@ -298,7 +338,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot dead"
+"default" 1.0 0 -16777216 true "" "plot count turtles"
 
 PLOT
 969
@@ -346,7 +386,7 @@ evolve-chance
 evolve-chance
 0
 1
-0.2
+0.41
 0.01
 1
 NIL
@@ -361,7 +401,7 @@ mutation-chance
 mutation-chance
 0
 1
-0.2
+0.5
 0.01
 1
 NIL
@@ -376,7 +416,7 @@ default-lifespan
 default-lifespan
 3
 10
-8
+10
 1
 1
 NIL
@@ -399,6 +439,21 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot max [complexity] of turtles"
+
+SLIDER
+19
+535
+192
+569
+range
+range
+0
+10
+4
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
