@@ -1,9 +1,9 @@
-globals [max-complexity mutation-chance dead]
+globals [max-complexity mutation-chance dead default-lifespan]
 turtles-own [complexity strategy lifespan next record recordLength]
 
 to setup
   clear-all
-  let default-lifespan 5
+  set default-lifespan 3
   set mutation-chance 0.2
   set max-complexity 5
   set dead 0
@@ -95,7 +95,7 @@ to reproduce
         ]
         set recordLength 0
         set record 0
-        set lifespan 5
+        set lifespan default-lifespan
         evolve parent-strategy
         getNext
       ]
