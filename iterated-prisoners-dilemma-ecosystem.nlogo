@@ -49,12 +49,15 @@ to go
     die
   ]
   ask turtles [
-    reproduce
+    if (remain (ticks) = 1) [
+     reproduce
+    ]
   ]
   tick
 end
-to evolve [parent-strategy]
-  set complexity complexity + 1
+to evolve [parent-strategy parent-complexity]
+  set complexity parent-complexity + 1
+  print complexity
   let strategy2 0
   let set-strategy 0
   let color-count 0
@@ -82,7 +85,7 @@ to reproduce
   ifelse evolve-chance > random-float 1 [
     ask patch-here [
       sprout 1 [
-        let patience 10
+        let patience 1
         set shape "circle"
         while [any? other turtles-here] [
           set heading 0
@@ -97,7 +100,7 @@ to reproduce
         set recordLength 0
         set record 0
         set lifespan default-lifespan
-        evolve parent-strategy
+        evolve parent-strategy parent-complexity
         getNext
       ]
     ]
@@ -204,12 +207,12 @@ to-report remain [one]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
-11
-823
-645
-100
-100
+255
+40
+500
+216
+25
+25
 3.0
 1
 10
@@ -220,10 +223,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--100
-100
--100
-100
+-25
+25
+-25
+25
 0
 0
 1
@@ -343,7 +346,7 @@ evolve-chance
 evolve-chance
 0
 1
-0.1
+0.2
 0.01
 1
 NIL
@@ -358,7 +361,7 @@ mutation-chance
 mutation-chance
 0
 1
-0.5
+0.2
 0.01
 1
 NIL
@@ -373,11 +376,29 @@ default-lifespan
 default-lifespan
 3
 10
-5
+8
 1
 1
 NIL
 HORIZONTAL
+
+PLOT
+975
+443
+1176
+594
+plot 2
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot max [complexity] of turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
