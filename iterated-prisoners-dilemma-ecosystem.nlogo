@@ -211,10 +211,10 @@ to playGroup [group]
   ask group [
     ifelse next = 1 [
       ask other group [
-        set pool pool - (2 / (count group - 1))
+        set pool pool - ((1 - group-efficacy) * 2 / (count group - 1))
       ]
     ] [
-      set pool pool - 1
+      set pool pool - (1 - group-efficacy)
     ]
   ]
   ask group [
@@ -249,8 +249,8 @@ end
 GRAPHICS-WINDOW
 255
 40
-557
-358
+673
+479
 25
 25
 8.0
@@ -386,7 +386,7 @@ evolve-chance
 evolve-chance
 0
 1
-0.41
+0.42
 0.01
 1
 NIL
@@ -401,7 +401,7 @@ mutation-chance
 mutation-chance
 0
 1
-0.5
+0.54
 0.01
 1
 NIL
@@ -416,7 +416,7 @@ default-lifespan
 default-lifespan
 3
 10
-10
+8
 1
 1
 NIL
@@ -444,13 +444,28 @@ SLIDER
 19
 535
 192
-569
+568
 range
 range
 0
 10
-4
+2
 1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+733
+64
+905
+97
+group-efficacy
+group-efficacy
+0
+1
+0
+0.1
 1
 NIL
 HORIZONTAL
