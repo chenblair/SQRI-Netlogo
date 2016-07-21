@@ -42,7 +42,7 @@ to setup
 end
 to go
   ask turtles [
-    ifelse count turtles in-radius range > 4
+    ifelse count turtles in-radius range > 4 and group-interaction = true
     [
       playGroup turtles in-radius range
     ] [
@@ -58,22 +58,22 @@ to go
     stop
   ]
   ask turtles [
-    if (remain (ticks) = 1) [
+    ; if (remain (ticks) = 1) [
      reproduce
-    ]
+    ; ]
   ]
   tick
 end
 to evolve [parent-strategy parent-complexity]
   set complexity parent-complexity + 1
-  if (complexity > 4) [
-    set complexity complexity - 1
+  if (complexity > greatest-complexity) [
+    set complexity greatest-complexity
   ]
   let strategy2 0
   let set-strategy 0
   let color-count 0
   while [set-strategy < (4 ^ complexity)] [
-    let set-strategy-mod remainder set-strategy 4 ^ (complexity - 1)
+    let set-strategy-mod remainder set-strategy 4 ^ (parent-complexity)
     ifelse (mutation-chance < random-float 1 and remain (floor (parent-strategy / (2 ^ set-strategy-mod))) = 1) [
       set strategy2 strategy2 + (2 ^ set-strategy)
       set color-count color-count + 1
@@ -211,10 +211,10 @@ to playGroup [group]
   ask group [
     ifelse next = 1 [
       ask other group [
-        set pool pool - ((1 - group-efficacy) * 2 / (count group - 1))
+        set pool pool - (2 / (count group - 1))
       ]
     ] [
-      set pool pool - (1 - group-efficacy)
+      set pool pool - 1
     ]
   ]
   ask group [
@@ -231,7 +231,7 @@ to playGroup [group]
         set outcome 1
       ]
     ]
-    set lifespan lifespan + pool
+    set lifespan lifespan + (pool * (1 - group-efficacy))
     set pool 0
     makeRecord outcome
     getNext
@@ -386,7 +386,7 @@ evolve-chance
 evolve-chance
 0
 1
-0.42
+0.79
 0.01
 1
 NIL
@@ -401,7 +401,7 @@ mutation-chance
 mutation-chance
 0
 1
-0.54
+0.02
 0.01
 1
 NIL
@@ -415,30 +415,12 @@ SLIDER
 default-lifespan
 default-lifespan
 3
-10
-8
+11
+5
 1
 1
 NIL
 HORIZONTAL
-
-PLOT
-975
-443
-1176
-594
-plot 2
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot max [complexity] of turtles"
 
 SLIDER
 19
@@ -464,11 +446,77 @@ group-efficacy
 group-efficacy
 0
 1
-0
+0.8
 0.1
 1
 NIL
 HORIZONTAL
+
+SWITCH
+737
+120
+922
+154
+group-interaction
+group-interaction
+1
+1
+-1000
+
+SLIDER
+734
+181
+914
+215
+greatest-complexity
+greatest-complexity
+0
+4
+2
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+970
+445
+1170
+595
+Strategies
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"pavlov" 1.0 0 -2674135 true "" "plot count turtles with [strategy = 6]"
+"tit-for-tat" 1.0 0 -14070903 true "" "plot count turtles with [strategy = 10]"
+"Kathryn" 1.0 0 -7500403 true "" "plot count turtles with [strategy = 0]"
+"punisher" 1.0 0 -955883 true "" "plot count turtles with [strategy = 14]"
+
+PLOT
+729
+254
+929
+404
+Moves
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Defect" 1.0 0 -16777216 true "" "plot count turtles with [next = 1]"
+"Cooperate" 1.0 0 -7500403 true "" "plot count turtles with [next = 0]"
 
 @#$#@#$#@
 ## WHAT IS IT?
