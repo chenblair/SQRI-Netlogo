@@ -58,9 +58,9 @@ to go
     stop
   ]
   ask turtles [
-    ; if (remain (ticks) = 1) [
+    if (remainder ticks reproduction-rate = 0 ) [
      reproduce
-    ; ]
+    ]
   ]
   tick
 end
@@ -415,8 +415,8 @@ SLIDER
 default-lifespan
 default-lifespan
 3
-11
-5
+20
+15
 1
 1
 NIL
@@ -456,7 +456,7 @@ SWITCH
 737
 120
 922
-154
+153
 group-interaction
 group-interaction
 1
@@ -467,12 +467,12 @@ SLIDER
 734
 181
 914
-215
+214
 greatest-complexity
 greatest-complexity
 0
 4
-2
+1
 1
 1
 NIL
@@ -496,7 +496,6 @@ true
 PENS
 "pavlov" 1.0 0 -2674135 true "" "plot count turtles with [strategy = 6]"
 "tit-for-tat" 1.0 0 -14070903 true "" "plot count turtles with [strategy = 10]"
-"Kathryn" 1.0 0 -7500403 true "" "plot count turtles with [strategy = 0]"
 "punisher" 1.0 0 -955883 true "" "plot count turtles with [strategy = 14]"
 
 PLOT
@@ -517,6 +516,21 @@ true
 PENS
 "Defect" 1.0 0 -16777216 true "" "plot count turtles with [next = 1]"
 "Cooperate" 1.0 0 -7500403 true "" "plot count turtles with [next = 0]"
+
+SLIDER
+20
+587
+193
+620
+reproduction-rate
+reproduction-rate
+1
+5
+4
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
