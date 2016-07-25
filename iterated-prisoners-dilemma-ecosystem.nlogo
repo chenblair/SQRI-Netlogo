@@ -6,7 +6,7 @@ to setup
   set max-complexity 5
   set dead 0
   ask patches [
-    set pcolor green
+    set pcolor [46 117 183]
   ]
   ask n-of num-turtle patches [
     sprout 1 [
@@ -245,6 +245,36 @@ to-report remain [one]
     report 1
   ]
 end
+
+
+to get-report
+  let cycles 16
+  while [cycles > 0] [
+    setup
+    ifelse (cycles mod 2 = 1) [
+      set mutation-chance 0.2
+    ][
+      set mutation-chance 0.8
+    ]
+    ifelse (floor (cycles / 2) mod 2 = 1) [
+      set group-interaction true
+    ] [
+      set group-interaction false
+    ]
+    ifelse (floor (cycles / 4) mod 2 = 1) [
+      set greatest-complexity 1
+    ] [
+      set greatest-complexity 2
+    ]
+    while [ticks < 1000] [
+      go
+    ]
+    export-view (word mutation-chance " " group-interaction " " greatest-complexity ".png")
+    export-all-plots (word mutation-chance " " group-interaction " " greatest-complexity ".csv")
+    export-all-plots (word mutation-chance " " group-interaction " " greatest-complexity ".txt")
+    set cycles cycles - 1
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 255
@@ -386,7 +416,7 @@ evolve-chance
 evolve-chance
 0
 1
-0.79
+0.5
 0.01
 1
 NIL
@@ -401,7 +431,7 @@ mutation-chance
 mutation-chance
 0
 1
-0.02
+0.2
 0.01
 1
 NIL
@@ -416,7 +446,7 @@ default-lifespan
 default-lifespan
 3
 20
-15
+10
 1
 1
 NIL
@@ -446,7 +476,7 @@ group-efficacy
 group-efficacy
 0
 1
-0.8
+0.5
 0.1
 1
 NIL
@@ -472,7 +502,7 @@ greatest-complexity
 greatest-complexity
 0
 4
-1
+2
 1
 1
 NIL
@@ -526,11 +556,28 @@ reproduction-rate
 reproduction-rate
 1
 5
-4
+2
 1
 1
 NIL
 HORIZONTAL
+
+BUTTON
+275
+509
+372
+542
+NIL
+get-report\n
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
