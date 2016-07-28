@@ -423,10 +423,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-20
-436
-192
-469
+745
+73
+917
+106
 mutation-chance
 mutation-chance
 0
@@ -468,10 +468,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-733
-64
-905
-97
+23
+436
+195
+469
 group-efficacy
 group-efficacy
 0
@@ -494,10 +494,10 @@ group-interaction
 -1000
 
 SLIDER
-734
-181
-914
-214
+742
+187
+922
+220
 greatest-complexity
 greatest-complexity
 0
@@ -577,6 +577,16 @@ NIL
 NIL
 NIL
 NIL
+1
+
+TEXTBOX
+772
+28
+922
+46
+Independent Variables\n
+11
+0.0
 1
 
 @#$#@#$#@
